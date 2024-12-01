@@ -47,6 +47,8 @@ Este sistema es una aplicación web diseñada para facilitar la gestión de viaj
   - `/controllers`: Controladores para la lógica de negocios.
   - `/views`: Vistas y plantillas HTML.
   - `/assets`: Archivos CSS, JavaScript y otros recursos estáticos.
+  - `/views/database.sql`: Archivo SQL, Estructura de la Base de Datos relacional.
+
 
 #### **Contribuciones**
 Se aceptan sugerencias y contribuciones para mejorar el sistema. Por favor, envía un pull request o abre un issue en el repositorio para discutir mejoras.
