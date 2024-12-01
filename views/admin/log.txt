@@ -1,0 +1,1 @@
+Contenido recibido: [{"numero":"7","categoria":"Económico"},{"numero":"8","categoria":"Económico"}]

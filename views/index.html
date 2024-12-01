@@ -1,0 +1,394 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BusBooker - Sistema de Reservas</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style> 
+    .btn-primary {
+        background-color: #F59E0B;
+        color: white;
+        padding: 0.5rem 1rem;
+        border-radius: 0.5rem;
+        transition: background-color 0.3s ease;
+    }
+    </style>
+</head>
+<body class="bg-gray-50 font-inter">
+    <div class="flex h-screen">
+        <!-- Sidebar Mejorado -->
+        <div class="bg-gradient-to-b from-gray-800 to-gray-900 text-white w-64 space-y-6 py-7 px-2 absolute inset-y-0 left-0 transform -translate-x-full md:relative md:translate-x-0 transition duration-200 ease-in-out">
+            <a href="/" class="text-white flex items-center space-x-2 px-4 group">
+                <div class="w-10 h-10 bg-amber-500 rounded-lg flex items-center justify-center transform group-hover:rotate-12 transition-transform">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"></path>
+                    </svg>
+                </div>
+                <span class="text-2xl font-extrabold text-gradient-orange">BusBooker</span>                
+                
+                <a href="/" class="flex items-center space-x-3 px-4 py-3 rounded-lg bg-amber-500 text-white transform hover:scale-105 transition-all">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path>
+                    </svg>
+                    <span class="font-medium">Inicio</span>
+                </a>
+                
+                <a href="/my-trips.html" class="flex items-center space-x-3 px-4 py-3 rounded-lg bg-amber-500 text-white transform hover:scale-105 transition-all">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path>
+                    </svg>
+                    <span class="font-medium">Mis Viajes</span>
+                </a>
+                
+                <a href="/destinations.html" class="flex items-center space-x-3 px-4 py-3 rounded-lg bg-amber-500 text-white transform hover:scale-105 transition-all">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7"></path>
+                    </svg>
+                    <span class="font-medium">Destinos</span>
+                </a>
+                
+                <a href="/profile.html" class="flex items-center space-x-3 px-4 py-3 rounded-lg bg-amber-500 text-white transform hover:scale-105 transition-all">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
+                    </svg>
+                    <span class="font-medium">Mi Perfil</span>
+                </a>
+            </nav>
+        </div>
+
+        <div class="flex-1 flex flex-col">
+            <!-- Header Mejorado -->
+            <header class="bg-white shadow-sm border-b border-gray-200">
+                <div class="flex justify-between items-center px-6 py-4">
+                    <h1 class="text-2xl font-bold text-amber-600">BusBooker</h1>                    <div class="flex items-center space-x-4">
+                        <div class="flex items-center space-x-2">
+                            <div class="w-8 h-8 bg-amber-100 rounded-full flex items-center justify-center">
+                                <svg class="h-5 w-5 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
+                                </svg>
+                            </div>
+                            <span class="text-gray-700 font-medium">Usuario Demo</span>
+                            <span class="text-sm text-amber-600 font-medium">(Usuario)</span>
+                        </div>
+                        <button onclick="location.href='login.html'" class="flex items-center space-x-2 px-4 py-2 rounded-lg text-gray-700 hover:bg-gray-100 transition-all group">
+                            <svg class="h-5 w-5 text-gray-500 group-hover:text-amber-600 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path>
+                            </svg>
+                            <span class="group-hover:text-amber-600 transition-colors">Cerrar Sesión</span>
+                        </button>
+                    </div>
+                </div>
+            </header>
+
+            <!-- Main Content Mejorado -->
+            <main class="flex-1 overflow-x-hidden overflow-y-auto bg-gray-50">
+                <div class="container mx-auto px-6 py-8">
+                    <!-- Hero Section Mejorado -->
+                    <div style="background-color: #F59E0B;" class="relative bg-orange-600 rounded-3xl p-12 mb-8 shadow-2xl overflow-hidden flex items-center justify-between">
+                        <div class="relative z-10">
+                            <h1 class="text-5xl font-bold text-white mb-4">Viaja con Comodidad y Seguridad</h1>
+                            <p class="text-xl text-amber-100">Reserva tus pasajes en bus con solo unos clics</p>
+                        </div>
+                        <i class="fas fa-bus text-white text-3xl sm:text-4xl md:text-6xl opacity-20"></i> <!-- Clases responsive para el tamaño del ícono -->
+                    </div>
+
+                    <!-- Search Form Mejorado -->
+                    <div class="grid md:grid-cols-5 gap-8">
+                        <form action="bus-selection.html" method="GET" class="md:col-span-3 bg-white rounded-2xl shadow-xl p-8 space-y-6 transform hover:scale-[1.02] transition-all">
+                            <h2 class="text-2xl font-bold text-amber-900 mb-6 flex items-center">
+                                <svg class="w-6 h-6 mr-2 text-amber-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                                </svg>
+                                Encuentra tu Ruta
+                            </h2>
+                            
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <!-- Origen -->
+                                <div class="relative">
+                                    <label class="block text-lg font-medium text-amber-700 mb-2">Origen</label>
+                                    <select class="block w-full h-20 rounded-lg border-2 border-amber-200 bg-orange-100 text-amber-700 text-lg focus:border-amber-500 focus:ring focus:ring-amber-200 focus:ring-opacity-50 transition-all">
+                                        <option value="">Selecciona ciudad de origen</option>
+                                        <option value="lima">Lima</option>
+                                        <option value="arequipa">Arequipa</option>
+                                        <option value="cusco">Cusco</option>
+                                    </select>
+                                </div>
+                    
+                                <!-- Destino -->
+                                <div class="relative">
+                                    <label class="block text-lg font-medium text-amber-700 mb-2">Destino</label>
+                                    <select class="block w-full h-20 rounded-lg border-2 border-amber-200 bg-orange-100 text-amber-700 text-lg focus:border-amber-500 focus:ring focus:ring-amber-200 focus:ring-opacity-50 transition-all">
+                                        <option value="">Selecciona ciudad de destino</option>
+                                        <option value="lima">Lima</option>
+                                        <option value="arequipa">Arequipa</option>
+                                        <option value="cusco">Cusco</option>
+                                    </select>
+                                </div>
+                    
+                                <!-- Fecha Ida -->
+                                <div class="relative">
+                                    <label class="block text-lg font-medium text-amber-700 mb-2">Fecha de Salida</label>
+                                    <input type="date" class="block w-full h-20 rounded-lg border-2 border-amber-200 bg-orange-100 text-amber-700 text-lg focus:border-amber-500 focus:ring focus:ring-amber-200 focus:ring-opacity-50 transition-all">
+                                </div>
+                    
+                                <!-- Fecha Vuelta (Opcional) -->
+                                <div class="relative">
+                                    <label class="block text-lg font-medium text-amber-700 mb-2">Fecha de Retorno (Opcional)</label>
+                                    <input type="date" class="block w-full h-20 rounded-lg border-2 border-amber-200 bg-orange-100 text-amber-700 text-lg focus:border-amber-500 focus:ring focus:ring-amber-200 focus:ring-opacity-50 transition-all">
+                                </div>
+                            </div>
+                    
+                            <button type="submit" class="w-full h-12 btn-primary font-bold rounded-md hover:bg-orange-700 transition duration-200">Buscar Buses Disponibles</button>
+                        </form>
+                            <!-- Sidebar Content -->
+                        <div class="md:col-span-2 space-y-6">
+                            <!-- Why Choose Us -->
+                            <div class="bg-white rounded-2xl shadow-xl p-8 transform hover:scale-[1.02] transition-all">
+                                <h2 class="text-xl font-bold text-amber-900 mb-6">¿Por qué elegirnos?</h2>
+                                <div class="space-y-6">
+                                    <div class="flex items-start space-x-4">
+                                        <div class="flex-shrink-0">
+                                            <div class="w-10 h-10 bg-amber-100 rounded-lg flex items-center justify-center">
+                                                <svg class="w-6 h-6 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path>
+                                                </svg>
+                                            </div>
+                                        </div>
+                                        <div>
+                                            <h3 class="font-semibold text-amber-900">Seguridad Primero</h3>
+                                            <p class="text-amber-700 text-sm">Todos nuestros buses pasan rigurosas pruebas de seguridad</p>
+                                        </div>
+                                    </div>
+
+                                    <div class="flex items-start space-x-4">
+                                        <div class="flex-shrink-0">
+                                            <div class="w-10 h-10 bg-amber-100 rounded-lg flex items-center justify-center">
+                                                <svg class="w-6 h-6 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+                                                </svg>
+                                            </div>
+                                        </div>
+                                        <div>
+                                            <h3 class="font-semibold text-amber-900">Flota Moderna</h3>
+                                            <p class="text-amber-700 text-sm">Buses cómodos con amenidades modernas</p>
+                                        </div>
+                                    </div>
+
+                                    <div class="flex items-start space-x-4">
+                                        <div class="flex-shrink-0">
+                                            <div class="w-10 h-10 bg-amber-100 rounded-lg flex items-center justify-center">
+                                                <svg class="w-6 h-6 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path>
+                                                </svg>
+                                            </div>
+                                        </div>
+                                        <div>
+                                            <h3 class="font-semibold text-amber-900">Soporte 24/7</h3>
+                                            <p class="text-amber-700 text-sm">Nuestro equipo de atención siempre está para ayudarte</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- News Updates -->
+                            <div class="bg-gradient-to-br from-amber-50 to-orange-50 rounded-2xl p-8 border border-amber-100 transform hover:scale-[1.02] transition-all">
+                                <h3 class="text-lg font-semibold text-amber-900 mb-4">Últimas Novedades</h3>
+                                <div class="space-y-4">
+                                    <div class="flex items-center space-x-3">
+                                        <span class="text-2xl">🎉</span>
+                                        <p class="text-amber-700">¡Nuevas rutas añadidas para temporada de verano!</p>
+                                    </div>
+                                    <div class="flex items-center space-x-3">
+                                        <span class="text-2xl">🌟</span>
+                                        <p class="text-amber-700">Obtén 10% de descuento en viajes de ida y vuelta</p>
+                                    </div>
+                                    <div class="flex items-center space-x-3">
+                                        <span class="text-2xl">💺</span>
+                                        <p class="text-amber-700">Asientos premium disponibles en todas las rutas</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Stats Section -->
+                    <div class="grid grid-cols-3 gap-8 my-12">
+                        <div class="bg-white rounded-xl shadow-lg p-8 text-center transform hover:scale-105 transition-all">
+                            <div class="w-16 h-16 bg-amber-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                                <svg class="w-8 h-8 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path>
+                                </svg>
+                            </div>
+                            <p class="text-3xl font-bold text-amber-900">10,000+</p>
+                            <p class="text-amber-600 font-medium">Usuarios Activos</p>
+                        </div>
+
+                        <div class="bg-white rounded-xl shadow-lg p-8 text-center transform hover:scale-105 transition-all">
+                            <div class="w-16 h-16 bg-amber-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                                <svg class="w-8 h-8 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7v8a2 2 0 002 2h6M8 7V5a2 2 0 012-2h4.586a1 1 0 01.707.293l4.414 4.414a1 1 0 01.293.707V15a2 2 0 01-2 2h-2"></path>
+                                </svg>
+                            </div>
+                            <p class="text-3xl font-bold text-amber-900">500+</p>
+                            <p class="text-amber-600 font-medium">Buses en Flota</p>
+                        </div>
+
+                        <div class="bg-white rounded-xl shadow-lg p-8 text-center transform hover:scale-105 transition-all">
+                            <div class="w-16 h-16 bg-amber-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                                <svg class="w-8 h-8 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                </svg>
+                            </div>
+                            <p class="text-3xl font-bold text-amber-900">1,000+</p>
+                            <p class="text-amber-600 font-medium">Viajes Diarios</p>
+                        </div>
+                    </div>
+
+                    <!-- Popular Destinations -->
+                    <div class="my-12">
+                        <h2 class="text-3xl font-bold text-amber-900 mb-8">Destinos Más Populares</h2>
+                        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+                            <!-- Cusco -->
+                            <div class="bg-white rounded-xl shadow-lg overflow-hidden group transform hover:scale-105 transition-all">
+                                <div class="h-48 relative overflow-hidden">
+                                    <img src="https://images.unsplash.com/photo-1587595431973-160d0d94add1" 
+                                         alt="Cusco" 
+                                         class="w-full h-full object-cover transform group-hover:scale-110 transition-transform duration-500">
+                                    <div class="absolute top-2 right-2 bg-amber-500 text-white px-3 py-1 rounded-full text-sm font-medium">
+                                        98% popularidad
+                                    </div>
+                                </div>
+                                <div class="p-6">
+                                    <h3 class="text-xl font-bold text-amber-900 mb-2">Cusco</h3>
+                                    <p class="text-amber-600 text-sm mb-4">Maravilla mundial, hogar de Machu Picchu</p>
+                                    <div class="flex justify-between items-center">
+                                        <span class="text-lg font-bold text-amber-500">Desde S/120</span>
+                                        <button class="px-4 py-2 bg-amber-100 text-amber-600 rounded-full text-sm font-medium hover:bg-amber-200 transition-colors">
+                                            Reservar
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Arequipa -->
+                            <div class="bg-white rounded-xl shadow-lg overflow-hidden group transform hover:scale-105 transition-all">
+                                <div class="h-48 relative overflow-hidden">
+                                    <img src="https://images.unsplash.com/photo-1584064149798-363dd4327d96" 
+                                         alt="Arequipa" 
+                                         class="w-full h-full object-cover transform group-hover:scale-110 transition-transform duration-500">
+                                    <div class="absolute top-2 right-2 bg-amber-500 text-white px-3 py-1 rounded-full text-sm font-medium">
+                                        92% popularidad
+                                    </div>
+                                </div>
+                                <div class="p-6">
+                                    <h3 class="text-xl font-bold text-amber-900 mb-2">Arequipa</h3>
+                                    <p class="text-amber-600 text-sm mb-4">La Ciudad Blanca y el Cañón del Colca</p>
+                                    <div class="flex justify-between items-center">
+                                        <span class="text-lg font-bold text-amber-500">Desde S/90</span>
+                                        <button class="px-4 py-2 bg-amber-100 text-amber-600 rounded-full text-sm font-medium hover:bg-amber-200 transition-colors">
+                                            Reservar
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Lima -->
+                            <div class="bg-white rounded-xl shadow-lg overflow-hidden group transform hover:scale-105 transition-all">
+                                <div class="h-48 relative overflow-hidden">
+                                    <img src="https://images.unsplash.com/photo-1531968455001-5c5272a41129" 
+                                         alt="Lima" 
+                                         class="w-full h-full object-cover transform group-hover:scale-110 transition-transform duration-500">
+                                    <div class="absolute top-2 right-2 bg-amber-500 text-white px-3 py-1 rounded-full text-sm font-medium">
+                                        95% popularidad
+                                    </div>
+                                </div>
+                                <div class="p-6">
+                                    <h3 class="text-xl font-bold text-amber-900 mb-2">Lima</h3>
+                                    <p class="text-amber-600 text-sm mb-4">Capital gastronómica de América</p>
+                                    <div class="flex justify-between items-center">
+                                        <span class="text-lg font-bold text-amber-500">Desde S/60</span>
+                                        <button class="px-4 py-2 bg-amber-100 text-amber-600 rounded-full text-sm font-medium hover:bg-amber-200 transition-colors">
+                                            Reservar
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Trujillo -->
+                            <div class="bg-white rounded-xl shadow-lg overflow-hidden group transform hover:scale-105 transition-all">
+                                <div class="h-48 relative overflow-hidden">
+                                    <img src="https://images.unsplash.com/photo-1596402184320-417e7178b2cd" 
+                                         alt="Trujillo" 
+                                         class="w-full h-full object-cover transform group-hover:scale-110 transition-transform duration-500">
+                                    <div class="absolute top-2 right-2 bg-amber-500 text-white px-3 py-1 rounded-full text-sm font-medium">
+                                        88% popularidad
+                                    </div>
+                                </div>
+                                <div class="p-6">
+                                    <h3 class="text-xl font-bold text-amber-900 mb-2">Trujillo</h3>
+                                    <p class="text-amber-600 text-sm mb-4">Ciudad de la Eterna Primavera</p>
+                                    <div class="flex justify-between items-center">
+                                        <span class="text-lg font-bold text-amber-500">Desde S/80</span>
+                                        <button class="px-4 py-2 bg-amber-100 text-amber-600 rounded-full text-sm font-medium hover:bg-amber-200 transition-colors">
+                                            Reservar
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </main>
+
+            <!-- Footer -->
+            <footer class="bg-white shadow-sm mt-auto">
+                <div class="container mx-auto px-6 py-4">
+                    <p class="text-center text-gray-600">
+                        © 2024 BusBooker. Todos los derechos reservados.
+                    </p>
+                </div>
+            </footer>
+        </div>
+    </div>
+
+    <script>
+        // Funcionalidad para el menú móvil
+        document.addEventListener('DOMContentLoaded', function() {
+            const sidebar = document.querySelector('.bg-gray-800');
+            const menuButton = document.createElement('button');
+            menuButton.className = 'md:hidden fixed top-4 left-4 z-50 bg-amber-500 p-2 rounded-lg text-white';
+            menuButton.innerHTML = `
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+                </svg>
+            `;
+            document.body.appendChild(menuButton);
+
+            menuButton.addEventListener('click', () => {
+                sidebar.classList.toggle('-translate-x-full');
+            });
+        });
+
+        // Animaciones suaves al scroll
+        const observerOptions = {
+            threshold: 0.1,
+            rootMargin: '0px'
+        };
+
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('animate-fadeIn');
+                    observer.unobserve(entry.target);
+                }
+            });
+        }, observerOptions);
+
+        document.querySelectorAll('.transform').forEach(el => observer.observe(el));
+    </script>
+</body>
+</html>
