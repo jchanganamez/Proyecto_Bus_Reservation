@@ -31,26 +31,14 @@ Este sistema es una aplicación web diseñada para facilitar la gestión de viaj
 5. Accede a la página principal para crear viajes y realizar reservaciones.
 
 #### **Cosas que Faltan Implementar**
-1. **Funcionalidades de usuario final:**
-   - Interfaz para que los pasajeros puedan reservar asientos directamente.
-   - Registro y autenticación de pasajeros.
-2. **Notificaciones:**
-   - Envío de confirmación por correo electrónico después de una reservación.
-   - Alertas de recordatorio para los viajes próximos.
-3. **Gestión avanzada de asientos:**
-   - Mostrar un esquema del bus con los asientos ocupados y disponibles.
-   - Permitir la selección por bloques (reservaciones grupales).
-4. **Reportes y estadísticas:**
-   - Generar reportes de ocupación de buses.
-   - Estadísticas de las rutas más utilizadas.
-5. **Optimización y mejoras:**
-   - Manejo avanzado de errores para consultas fallidas.
-   - Cacheo de datos para mejorar el rendimiento.
-   - Mejorar la seguridad contra ataques de inyección SQL y XSS.
-6. **Mobile-friendly:**
-   - Optimizar la interfaz para dispositivos móviles.
-7. **Multi-idioma:**
-   - Agregar soporte para varios idiomas.
+1. **Conectar todo al Dashboard:**
+   - Integrar todas las funcionalidades en un panel de administración para gestionar los viajes, buses y reservaciones de manera centralizada.
+2. **Añadir lo de la moneda:**
+   - Implementar una funcionalidad para mostrar los precios en una moneda seleccionada por el usuario. Esto implicaría la conversión de monedas y la actualización de los precios de los destinos y asientos.
+4. **Modificar la eliminación de un viaje para eliminar todo desde su raíz:**
+   - Al eliminar un viaje, es necesario asegurar que se eliminen todas las relaciones asociadas a ese viaje (reservaciones, asientos ocupados, etc.) desde la raíz.
+6. **Hacer el trigger y la tabla para las últimas acciones:**
+   - Crear un trigger que registre las últimas acciones realizadas en el sistema (como la creación, actualización o eliminación de viajes, reservaciones, etc.) y almacenarlas en una tabla específica para auditoría.
 
 #### **Notas Adicionales**
 - Para cualquier problema, consulta los logs generados por PHP o los errores de la consola del navegador para depurar.
