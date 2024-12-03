@@ -27,8 +27,32 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     // Eliminar usuario
     if (isset($_POST['action']) && $_POST['action'] === 'delete') {
-        $userController->deleteUser (); // Llama al método deleteUser del controlador
-        $message = 'Usuario eliminado exitosamente'; // Mensaje de éxito
+        $userId = $_POST['id']; // Obtener el ID del usuario a eliminar
+        
+        // Verificar si el usuario tiene viajes realizados
+        $hasTrips = $userController->userHasTrips($userId); // Método que debes implementar
+
+        if ($hasTrips) {
+            // Mostrar un mensaje de advertencia
+            echo "<script>
+                if (confirm('Este usuario tiene viajes registrados. ¿Está seguro de que desea eliminarlo y sus registros relacionados?')) {
+                    // Si el usuario confirma, se procede a eliminar
+                    document.getElementById('delete-form').submit();
+                }
+            </script>";
+            if ($userController->deleteUser ($userId)) {
+                $message = 'Usuario y sus registros relacionados eliminados exitosamente.';
+            } else {
+                $message = 'Error al eliminar el usuario y sus registros relacionados.';
+            }
+        } else {
+            // Si no tiene viajes, proceder a eliminar directamente
+            if ($userController->deleteUserSimple($userId)) {
+                $message = 'Usuario eliminado exitosamente de la tabla usuarios.';
+            } else {
+                $message = 'Error al eliminar el usuario de la tabla usuarios.';
+            }
+        }
     }
 }
 $users = json_decode($userController->getAllUsers(), true);

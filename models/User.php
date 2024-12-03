@@ -123,14 +123,123 @@ class User {
         return $stmt->execute();
     }
 
-    // Eliminar usuario
     public function delete() {
-        $query = "DELETE FROM " . $this->table_name . " WHERE id = ?";
-        $stmt = $this->conn->prepare($query);
-
         $this->id = htmlspecialchars(strip_tags($this->id));
-        $stmt->bindParam(1, $this->id);
-
-        return $stmt->execute();
+    
+        try {
+            // Iniciar transacción
+            $this->conn->beginTransaction();
+    
+            // Paso 1: Obtener los asientos ocupados por el usuario
+            $queryAsientos = "
+                SELECT dv.asiento 
+                FROM detalle_viaje dv 
+                JOIN viajes v ON dv.viaje_id = v.id 
+                WHERE v.user_id = :user_id
+            ";
+            $stmtAsientos = $this->conn->prepare($queryAsientos);
+            $stmtAsientos->bindParam(':user_id', $this->id);
+            $stmtAsientos->execute();
+            $asientosOcupados = $stmtAsientos->fetchAll(PDO::FETCH_COLUMN); // Obtener solo los números de asientos
+    
+            // Paso 2: Actualizar los asientos a 'disponible'
+            if (!empty($asientosOcupados)) {
+                $placeholders = implode(',', array_fill(0, count($asientosOcupados), '?'));
+                $queryActualizarAsientos = "
+                    UPDATE asientos 
+                    SET estado = 'disponible' 
+                    WHERE numero_asiento IN ($placeholders)
+                ";
+                $stmtActualizar = $this->conn->prepare($queryActualizarAsientos);
+                $stmtActualizar->execute($asientosOcupados); // Ejecutar la consulta con los asientos ocupados
+            }
+    
+            // Paso 3: Eliminar referencias en la tabla 'pagos'
+            $queryPagos = "DELETE FROM pagos WHERE user_id = :user_id";
+            $stmtPagos = $this->conn->prepare($queryPagos);
+            $stmtPagos->bindParam(':user_id', $this->id);
+            $stmtPagos->execute();
+    
+            // Paso 4: Eliminar referencias en la tabla 'detalle_viaje'
+            $queryDetalleViaje = "DELETE FROM detalle_viaje WHERE usuario_id = :usuario_id";
+            $stmtDetalleViaje = $this->conn->prepare($queryDetalleViaje);
+            $stmtDetalleViaje->bindParam(':usuario_id', $this->id);
+            $stmtDetalleViaje->execute();
+    
+            // Paso 5: Eliminar referencias en la tabla 'viajes'
+            $queryViajes = "DELETE FROM viajes WHERE user_id = :user_id";
+            $stmtViajes = $this->conn->prepare($queryViajes);
+            $stmtViajes->bindParam(':user_id', $this->id);
+            $stmtViajes->execute();
+    
+            // Paso 6: Finalmente, eliminar el usuario de la tabla 'usuarios'
+            $queryDeleteUser   = "DELETE FROM " . $this->table_name . " WHERE id = :user_id";
+            $stmtDeleteUser   = $this->conn->prepare($queryDeleteUser  );
+            $stmtDeleteUser ->bindParam(':user_id', $this->id);
+            
+            // Ejecutar la eliminación del usuario
+            $stmtDeleteUser ->execute();
+    
+            // Si todo fue exitoso, confirmar la transacción
+            $this->conn->commit();
+            return true; // Retornar true si la eliminación fue exitosa
+        } catch (Exception $e) {
+            // Si ocurre un error, revertir la transacción
+            $this->conn->rollBack();
+            return false; // Retornar false si hubo un error
+        }
     }
+
+    public function deleteUserSimple($userId) {
+        // Establecer el ID del usuario a eliminar
+        $this->user->id = $userId; // Asignar el ID del usuario
+    
+        // Llamar al método delete en el modelo User
+        if ($this->user->delete()) {
+            return true; // Retornar true si la eliminación fue exitosa
+        }
+        return false; // Retornar false si hubo un error
+    }
+
+
+    public function userHasTripsC($userId) {
+        $query = "SELECT COUNT(*) FROM viajes WHERE user_id = :user_id";
+        $stmt = $this->conn->prepare($query); // Aquí usamos $this->conn
+        $stmt->bindParam(':user_id', $userId);
+        $stmt->execute();
+        
+        return $stmt->fetchColumn() > 0; // Retorna verdadero si hay viajes
+    }
+
+    public function updateProfile() {
+        session_start();
+        if (!isset($_SESSION['user_id'])) {
+            return json_encode(['error' => 'User not authenticated']);
+        }
+    
+        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            $this->user->id = $_SESSION['user_id'];
+            $this->user->nombre = $_POST['nombre'] ?? '';
+            $this->user->email = $_POST['email'] ?? '';
+            $this->user->telefono = $_POST['telefono'] ?? '';
+    
+            // Validar que los campos no estén vacíos
+            if (empty($this->user->nombre) || empty($this->user->email)) {
+                return json_encode(['error' => 'Name and email are required']);
+            }
+    
+            // Validar email
+            if (!filter_var($this->user->email, FILTER_VALIDATE_EMAIL)) {
+                return json_encode(['error' => 'Invalid email format']);
+            }
+    
+            if ($this->user->update()) {
+                return json_encode(['success' => true, 'message' => 'Profile updated successfully']);
+            }
+    
+            return json_encode(['error' => 'Failed to update profile']);
+        }
+    }
+    
+    
 }

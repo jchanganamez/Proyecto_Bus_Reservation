@@ -121,6 +121,10 @@ class BusController {
         }
     }
 
+    public function busHasTrips($userId) {
+        return $this->bus->busHasTripsB($userId); // Llamar al método del modelo User
+    }
+
     private function isAdmin() {
         return isset($_SESSION['es_admin']) && $_SESSION['es_admin'] == 1;
     }

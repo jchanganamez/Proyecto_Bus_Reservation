@@ -36,7 +36,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $message = "El correo electrónico ya está registrado.";
         } else {
             // Registrar al usuario
-            if ($user->register()) {
+            if ($user->create()) {
                 $message = "Registro exitoso. Puedes iniciar sesión ahora.";
                 // Redirigir a la página de inicio de sesión
                 header('Location: login.html');

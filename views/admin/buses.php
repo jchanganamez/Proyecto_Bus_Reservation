@@ -31,8 +31,22 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     // Eliminar bus
     if (isset($_POST['action']) && $_POST['action'] === 'delete') {
-        $busController->deleteBus(); // Llama al método deleteBus del controlador
-        $message = 'Bus Eliminado exitosamente'; 
+        $busId = $_POST['id']; // Obtener el ID del bus a eliminar
+        
+        // Verificar si el bus tiene viajes asignados
+        $hasTrips = $busController->busHasTrips($busId); // Método que verifica si el bus tiene viajes
+
+        if ($hasTrips) {
+            // Si el bus tiene viajes, no se puede eliminar
+            $message = 'No se puede eliminar el bus porque tiene viajes asignados.';
+        } else {
+            // Si no tiene viajes, proceder a eliminar
+            if ($busController->deleteBus($busId)) {
+                $message = 'Bus eliminado exitosamente.';
+            } else {
+                $message = 'Error al eliminar el bus.';
+            }
+        }
     }
 }
 

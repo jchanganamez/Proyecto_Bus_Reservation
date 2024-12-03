@@ -75,9 +75,6 @@ class UserController {
     }
 
     public function getUserById($id) {
-        if (!$this->isAdmin()) {
-            return json_encode(['error' => 'Unauthorized access']);
-        }
     
         if (!is_numeric($id)) {
             return json_encode(['error' => 'Invalid user ID']);
@@ -134,8 +131,31 @@ class UserController {
         }
     }
 
-    private function isAdmin() {
-        return isset($_SESSION['es_admin']) && $_SESSION['es_admin'] == 1;
+    public function updateProfile($userId, $nombre, $email, $telefono) {
+        // Aquí debes implementar la lógica para actualizar el perfil del usuario.
+        // Por ejemplo, llamar al modelo User para realizar la actualización en la base de datos.
+    
+        // Validar que el usuario esté autenticado
+        if (!isset($_SESSION['user_id'])) {
+            return json_encode(['error' => 'User  not authenticated']);
+        }
+    
+        // Validar que los campos no estén vacíos
+        if (empty($nombre) || empty($email) || empty($telefono)) {
+            return json_encode(['error' => 'All fields are required']);
+        }
+    
+        // Llama al modelo User para actualizar el perfil
+        $this->user->id = $userId;
+        $this->user->nombre = $nombre;
+        $this->user->email = $email;
+        $this->user->telefono = $telefono;
+    
+        if ($this->user->update()) {
+            return json_encode(['success' => true, 'message' => 'Profile updated successfully']);
+        }
+    
+        return json_encode(['error' => 'Failed to update profile']);
     }
 }
 ?>

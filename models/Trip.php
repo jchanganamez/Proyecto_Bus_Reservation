@@ -45,7 +45,7 @@ class Trip {
                     conductor_id = :conductor_id,
                     precio = :precio,  
                     user_id = :user_id,
-                    estado = 'en espera',
+                    estado = 'En Espera',
                     created_at = CURRENT_TIMESTAMP";
     
         $stmt = $this->db->prepare($query);
@@ -203,7 +203,8 @@ class Trip {
                 v.fecha_llegada,
                 b.modelo AS bus_modelo,
                 c.nombre AS conductor_nombre,
-                v.precio
+                v.precio,
+                v.estado
             FROM viajes v
             JOIN buses b ON v.bus_id = b.id
             JOIN conductores c ON v.conductor_id = c.id
@@ -230,25 +231,21 @@ class Trip {
                     fecha_llegada = :fecha_llegada,
                     bus_id = :bus_id,
                     conductor_id = :conductor_id,
-                    precio_vip = :precio_vip,
-                    precio_estandar = :precio_estandar,
-                    precio_economico = :precio_economico
+                    precio = :precio  -- Elimina 'precio_vip', 'precio_estandar', y 'precio_economico' si no son necesarios
                 WHERE id = :id";
-
+    
         $stmt = $this->db->prepare($query);
-
-        // Sanitize
+    
+        // Sanitizar
         $this->origen = htmlspecialchars(strip_tags($this->origen));
         $this->destino = htmlspecialchars(strip_tags($this->destino));
         $this->fecha_salida = htmlspecialchars(strip_tags($this->fecha_salida));
         $this->fecha_llegada = htmlspecialchars(strip_tags($this->fecha_llegada));
         $this->bus_id = htmlspecialchars(strip_tags($this->bus_id));
         $this->conductor_id = htmlspecialchars(strip_tags($this->conductor_id));
-        $this->precio_vip = htmlspecialchars(strip_tags($this->precio_vip));
-        $this->precio_estandar = htmlspecialchars(strip_tags($this->precio_estandar));
-        $this->precio_economico = htmlspecialchars(strip_tags($this->precio_economico));
+        $this->precio = htmlspecialchars(strip_tags($this->precio)); // Asegúrate de que este valor esté definido
         $this->id = htmlspecialchars(strip_tags($this->id));
-
+    
         // Bind values
         $stmt->bindParam(":origen", $this->origen);
         $stmt->bindParam(":destino", $this->destino);
@@ -256,12 +253,10 @@ class Trip {
         $stmt->bindParam(":fecha_llegada", $this->fecha_llegada);
         $stmt->bindParam(":bus_id", $this->bus_id);
         $stmt->bindParam(":conductor_id", $this->conductor_id);
-        $stmt->bindParam(":precio_vip", $this->precio_vip);
-        $stmt->bindParam(":precio_estandar", $this->precio_estandar);
-        $stmt->bindParam(":precio_economico", $this->precio_economico);
+        $stmt->bindParam(":precio", $this->precio); // Asegúrate de que este valor esté definido
         $stmt->bindParam(":id", $this->id);
-
-        if($stmt->execute()) {
+    
+        if ($stmt->execute()) {
             return true;
         }
         return false;
@@ -270,41 +265,55 @@ class Trip {
     public function delete($id) {
         $this->id = $id;  // Asignamos el ID a la propiedad de la clase
         
+        // Paso 1: Obtener los asientos ocupados para el viaje
         $queryAsientos = "
-            UPDATE asientos 
-            SET estado = 'disponible'
-            WHERE id IN (
-                SELECT id 
-                FROM detalle_viaje 
-                WHERE viaje_id = ?
-            )
+            SELECT asiento 
+            FROM detalle_viaje 
+            WHERE viaje_id = :viaje_id
         ";
         
-        // Paso 1: Eliminar los detalles del viaje
-        $queryDetalleViaje = "DELETE FROM detalle_viaje WHERE viaje_id = ?";
-        $stmtDetalleViaje = $this->db->prepare($queryDetalleViaje);
-        $stmtDetalleViaje->bindParam(1, $this->id, PDO::PARAM_INT);
-        $stmtDetalleViaje->execute();
-    
-        // Paso 2: Eliminar los pagos relacionados (cambiamos viaje_id por trip_id)
-        $queryPagos = "DELETE FROM pagos WHERE trip_id = ?";
-        $stmtPagos = $this->db->prepare($queryPagos);
-        $stmtPagos->bindParam(1, $this->id, PDO::PARAM_INT);
-        $stmtPagos->execute();
-    
-        // Paso 3: Eliminar el viaje
-        $queryViajes = "DELETE FROM viajes WHERE id = ?";
-        $stmtViajes = $this->db->prepare($queryViajes);
-        $stmtViajes->bindParam(1, $this->id, PDO::PARAM_INT);
-        $stmtViajes->execute();
-    
-        // Paso 4: Actualizar los asientos de ocupado a disponible
-        
         $stmtAsientos = $this->db->prepare($queryAsientos);
-        $stmtAsientos->bindParam(1, $this->id, PDO::PARAM_INT);
+        $stmtAsientos->bindParam(':viaje_id', $this->id, PDO::PARAM_INT);
         $stmtAsientos->execute();
-    }
+        $asientosOcupados = $stmtAsientos->fetchAll(PDO::FETCH_COLUMN); // Obtener solo los números de asientos
     
+        // Paso 2: Actualizar los asientos de ocupado a disponible
+        if (!empty($asientosOcupados)) {
+            // Crear una lista de placeholders para la consulta
+            $placeholders = implode(',', array_fill(0, count($asientosOcupados), '?'));
+            $queryActualizarAsientos = "
+                UPDATE asientos 
+                SET estado = 'disponible' 
+                WHERE bus_id = (
+                    SELECT bus_id FROM viajes WHERE id = ?
+                ) AND numero_asiento IN ($placeholders)
+            ";
+            
+            $stmtActualizar = $this->db->prepare($queryActualizarAsientos);
+            // Ejecutar la consulta con el ID del viaje y los asientos ocupados
+            $stmtActualizar->execute(array_merge([$this->id], array_values($asientosOcupados))); // Pasar el ID del viaje y los asientos ocupados
+        }
+    
+        // Paso 3: Eliminar los detalles del viaje
+        $queryDetalleViaje = "DELETE FROM detalle_viaje WHERE viaje_id = :viaje_id";
+        $stmtDetalleViaje = $this->db->prepare($queryDetalleViaje);
+        $stmtDetalleViaje->bindParam(':viaje_id', $this->id, PDO::PARAM_INT);
+        $stmtDetalleViaje->execute();
+        
+        // Paso 4: Eliminar los pagos relacionados
+        $queryPagos = "DELETE FROM pagos WHERE trip_id = :viaje_id";
+        $stmtPagos = $this->db->prepare($queryPagos);
+        $stmtPagos->bindParam(':viaje_id', $this->id, PDO::PARAM_INT);
+        $stmtPagos->execute();
+        
+        // Paso 5: Eliminar el viaje
+        $queryViajes = "DELETE FROM viajes WHERE id = :viaje_id";
+        $stmtViajes = $this->db->prepare($queryViajes);
+        $stmtViajes->bindParam(':viaje_id', $this->id, PDO::PARAM_INT);
+        $stmtViajes->execute();
+        
+        return true; // Retornar true si todo fue exitoso
+    }
 
     public function getTripById($trip_id) {
         $query = "SELECT * FROM " . $this->table_name . " WHERE id = :trip_id"; // Consulta SQL

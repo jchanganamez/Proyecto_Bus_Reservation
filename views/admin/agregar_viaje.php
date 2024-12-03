@@ -223,15 +223,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['destino'])) {
             // Calcular y actualizar el total
             let total = parseFloat(document.getElementById('costo_destino').value) || 0; // Inicia el total con el costo del destino
             seatsArray.forEach(seat => {
-                switch (seat.category) {
+                switch (seat.categoria) {
                     case 'vip':
-                        total += 15;
+                        total += 15; // Precio adicional por asiento VIP
                         break;
                     case 'estandar':
-                        total += 10;
+                        total += 10; // Precio adicional por asiento estándar
                         break;
                     case 'economico':
-                        total += 8;
+                        total += 8; // Precio adicional por asiento económico
                         break;
                     default:
                         console.error('Categoría de asiento no válida');

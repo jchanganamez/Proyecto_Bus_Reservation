@@ -48,12 +48,38 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $message = 'Error al eliminar el viaje';
         }
     }
+    if (isset($_POST['action'])) {
+        $id = $_POST['id'];
+
+        if ($_POST['action'] === 'approve') {
+            // Lógica para aprobar el viaje
+            $queryApprove = "UPDATE viajes SET estado = 'Confirmado' WHERE id = :id";
+            $stmtApprove = $conn->prepare($queryApprove);
+            $stmtApprove->bindParam(':id', $id);
+            if ($stmtApprove->execute()) {
+                $message = "El viaje ha sido aprobado exitosamente.";
+            } else {
+                $message = "Error al aprobar el viaje.";
+            }
+        } elseif ($_POST['action'] === 'cancel') {
+            // Lógica para cancelar el viaje
+            $queryCancel = "UPDATE viajes SET estado = 'Cancelado' WHERE id = :id";
+            $stmtCancel = $conn->prepare($queryCancel);
+            $stmtCancel->bindParam(':id', $id);
+            if ($stmtCancel->execute()) {
+                $message = "El viaje ha sido cancelado exitosamente.";
+            } else {
+                $message = "Error al cancelar el viaje.";
+            }
+        }
+    }
 }
 
 // Mostrar mensaje de éxito o error
 if (isset($message)) {
     echo '<p class="text-green-500">' . htmlspecialchars($message) . '</p>';
 }
+$trips = $tripController->getAllTrips();
 ?>
 
 <body class="bg-gray-100">
@@ -135,20 +161,20 @@ if (isset($message)) {
                                     <?php endforeach; ?>
                                 </select>
                         </div>
-                            
-                            <div>
-                                <label for="precio" class="block text-sm font-medium text-gray-700 mb-2">Precio:</label>
-                                <input type="number" step="0.01" id="precio" name="precio" class="w-full h-12 p-2 border border-gray-300 rounded-lg" required>
-                            </div>
+        
+                        <div>
+                            <label for="precio" class="block text-sm font-medium text-gray-700 mb-2">Precio:</label>
+                            <input type="number" step="0.01" id="precio" name="precio" class="w-full h-12 p-2 border border-gray-300 rounded-lg" required>
                         </div>
+                    </div>
                         
-                        <!-- Botones -->
-                        <div class="flex justify-end mt-6 space-x-2">
-                            <button type="button" class="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600"
-                                    onclick="document.getElementById('create-trip-modal').classList.add('hidden')">Cancelar</button>
-                            <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">Agregar</button>
-                        </div>
-                    </form>
+                    <!-- Botones -->
+                    <div class="flex justify-end mt-6 space-x-2">
+                        <button type="button" class="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600"
+                                onclick="document.getElementById('create-trip-modal').classList.add('hidden')">Cancelar</button>
+                        <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">Agregar</button>
+                    </div>
+                </form>
                 </div>
             </div>
 
@@ -164,6 +190,8 @@ if (isset($message)) {
                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Modelo del Bus</th>
                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Conductor</th>
                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Precio</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Estado</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">¿Aprobar?</th>
                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Acciones</th>
                     </tr>
                 </thead>
@@ -176,11 +204,53 @@ if (isset($message)) {
                                 <td class="px-6 py-4 whitespace-nowrap"><?= htmlspecialchars($trip['fecha_llegada']) ?></td>
                                 <td class="px-6 py-4 whitespace-nowrap"><?= htmlspecialchars($trip['bus_modelo']) ?></td>
                                 <td class="px-6 py-4 whitespace-nowrap"><?= htmlspecialchars($trip['conductor_nombre']) ?></td>
-                                <td class="px-6 py-4 whitespace-nowrap">$<?= number_format($trip['precio'], 2) ?></td>
+                                <td class="px-6 py-4 whitespace-nowrap">S/<?= number_format($trip['precio'], 2) ?></td>
+                                
                                 <td class="px-6 py-4 whitespace-nowrap">
-                                    <a href="editar_viaje.php?id=<?= $trip['id'] ?>" class="text-amber-600 hover:text-amber-900 mr-3">
-                                        <i class="fas fa-edit"></i>
-                                    </a>
+                                    <?php
+                                    $estado = isset($trip['estado']) && !empty($trip['estado']) ? htmlspecialchars($trip['estado']) : 'En espera';
+                                    $colorTexto = '';
+                                    $colorFondo = '';
+
+                                    switch ($estado) {
+                                        case 'Confirmado':
+                                            $colorTexto = 'text-green-800';
+                                            $colorFondo = 'bg-green-100';
+                                            break;
+                                        case 'En Espera':
+                                            $colorTexto = 'text-blue-800';
+                                            $colorFondo = 'bg-blue-100';
+                                            break;
+                                        case 'Cancelado':
+                                            $colorTexto = 'text-red-800';
+                                            $colorFondo = 'bg-red-100';
+                                            break;
+                                        default:
+                                            $colorTexto = 'text-gray-800';
+                                            $colorFondo = 'bg-gray-100';
+                                    }
+                                    ?>
+                                    <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full <?= $colorFondo ?> <?= $colorTexto ?>">
+                                        <?= ucfirst($estado) ?>
+                                    </span>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap text-center"> <!-- Añadido text-center para centrar los íconos -->
+                                    <form action="" method="POST" style="display:inline;">
+                                        <input type="hidden" name="id" value="<?= $trip['id'] ?>">
+                                        <input type="hidden" name="action" value="approve">
+                                        <button type="submit" class="text-green-600 hover:text-green-900" onclick="return confirm('¿Estás seguro de que deseas aprobar este viaje?');">
+                                            <i class="fas fa-check"></i> <!-- Icono de aprobar -->
+                                        </button>
+                                    </form>
+                                    <form action="" method="POST" style="display:inline;">
+                                        <input type="hidden" name="id" value="<?= $trip['id'] ?>">
+                                        <input type="hidden" name="action" value="cancel">
+                                        <button type="submit" class="text-red-600 hover:text-red-900" onclick="return confirm('¿Estás seguro de que deseas cancelar este viaje?');">
+                                            <i class="fas fa-times"></i> <!-- Icono de cancelar -->
+                                        </button>
+                                    </form>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap text-center"> <!-- Añadido text-center -->
                                     <form action="" method="POST" style="display:inline;">
                                         <input type="hidden" name="id" value="<?= $trip['id'] ?>">
                                         <input type="hidden" name="action" value="delete">

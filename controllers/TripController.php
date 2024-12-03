@@ -99,14 +99,13 @@ class TripController {
     }
 
     // En el controlador, en la función deleteTrip()
-public function deleteTrip($id) {
-    $tripModel = new Trip($this->db);
-    if ($tripModel->delete($id)) {
-        return true;
+    public function deleteTrip($id) {
+        $tripModel = new Trip($this->db);
+        if ($tripModel->delete($id)) {
+            return true;
+        }
+        return false;
     }
-    return false;
-}
-
 
     private function isAdmin() {
         return isset($_SESSION['es_admin']) && $_SESSION['es_admin'] == 1;

@@ -81,6 +81,23 @@ foreach ($selectedSeats as $seat) {
     }
 }
 $total = floatval($total);
+// Al inicio del archivo, después de obtener el total
+$currency = $_POST['currency'] ?? 'S/'; // Usar el valor enviado en el formulario o 'S/' por defecto
+
+// Definir los valores de conversión
+$conversionRates = [
+    'S/' => 1,
+    '$' => 3.75, // Ejemplo: 1 dólar = 3.75 soles
+    '€' => 4.10, // Ejemplo: 1 euro = 4.10 soles
+    '¥' => 0.027 // Ejemplo: 1 yen = 0.027 soles
+];
+
+if (!isset($conversionRates[$currency])) {
+    die('Error: Moneda no soportada.');
+}
+
+// Multiplicar el total por el valor de la moneda seleccionada
+$totalConverted = $total * $conversionRates[$currency];
 
 $trip = $tripController->getTrip();
 $trip->origen = $origen;
@@ -146,14 +163,15 @@ include 'layouts/header.php';
                     <?php endforeach; ?>
                 </ul>
                 <h2 class="text-xl font-semibold mt-6 mb-4 text-green-600">Total a Pagar</h2>
-                <p class="text-2xl font-bold text-green-700">S/ <?php echo number_format($total, 2); ?></p>
-            </div>
+                <p id="total-amount" class="text-2xl font-bold text-green-700">S/ <?php echo number_format($total, 2); ?></p>
+                </div>
             <!-- Métodos de Pago -->
             <div class="bg-white rounded-lg shadow-md p-6">
                 <form action="confirm-payment.php" method="POST">
                 <input type="hidden" name="trip_id" value="<?php echo htmlspecialchars($tripId); ?>">                    
                 <input type="hidden" name="seats" value="<?php echo htmlspecialchars(json_encode($selectedSeats)); ?>">
-                <input type="hidden" name="total" value="<?php echo htmlspecialchars($total); ?>"> <!-- Asegúrate de que el total se pase aquí -->
+                <input type="hidden" name="total" value="<?php echo $totalConverted; ?>" /> <!-- Aquí envías el total convertido -->                
+                <input type="hidden" name="currency" id="currency" value="<?php echo $currency; ?>">
                     <h2 class="text-xl font-semibold mb-4">Método de Pago</h2>
                     <div class="mb-4">
                         <label class="block text-sm font-medium text-gray-700 mb-1">Selecciona un Método de Pago</label>
@@ -250,6 +268,43 @@ include 'layouts/header.php';
                 inputs.forEach(input => input.disabled = false);
             }
         });
+        
+        function setCurrency(symbol) {
+            // Guardar la moneda seleccionada en localStorage
+            localStorage.setItem('currency', symbol);
+            document.getElementById('currency-symbol').textContent = symbol; // Cambiar el símbolo en el botón
+            document.getElementById('currency').value = symbol; // Actualizar el campo oculto
+
+            // Realizar la conversión y actualizar el total mostrado
+            const total = <?php echo json_encode($total); ?>; // Total en soles (S/)
+            const conversionRates = {
+                'S/': 1,
+                '$': 3.75,
+                '€': 4.10,
+                '¥': 0.027
+            };
+            
+            // Calcular el total convertido según la moneda seleccionada
+            const totalConverted = total * conversionRates[symbol];
+            
+            // Actualizar el total mostrado en la página
+            document.getElementById('total-amount').textContent = symbol + " " + totalConverted.toFixed(2);
+
+            closeCurrencyMenu(); // Cerrar el menú después de seleccionar
+        }
+
+        // Establecer la moneda por defecto al cargar la página
+        document.addEventListener('DOMContentLoaded', function() {
+            const currency = localStorage.getItem('currency') || 'S/';
+            document.getElementById('currency').value = currency;        
+        });
+
+        window.onload = function() {
+            const currency = localStorage.getItem('currency') || 'S/';
+            document.getElementById('currency-symbol').textContent = currency; // Actualizar el símbolo en el botón
+            setCurrency(currency); // Llamar a la función para actualizar el total
+        }
+
 
         // Disparar el evento de cambio al cargar la página para mostrar los campos predeterminados
         document.getElementById('payment-method').dispatchEvent(new Event('change'));

@@ -81,7 +81,12 @@ $cvv = $_POST['cvv'] ?? '';
 $yapeNumber = $_POST['yape_number'] ?? '';
 $plinNumber = $_POST['plin_number'] ?? '';
 $paypalEmail = $_POST['paypal_email'] ?? '';
-$total = $_POST['total'] ?? 0; // O la forma en que obtienes el total
+$total = $_POST['total'] ?? 0;
+if ($total <= 0) {
+    die('Error: El total no es válido.');
+}
+$currency = $_POST['currency'] ?? 'S/';
+
 $total = floatval($total); // Asegúrate de convertirlo a float
 
 // Verifica si el total es un número válido
@@ -135,7 +140,7 @@ include 'layouts/header.php';
                 <p><strong>Destino:</strong> <?php echo htmlspecialchars($_SESSION['datos_viaje']['destino']); ?></p>
                 <p><strong>Fecha de Ida:</strong> <?php echo htmlspecialchars($_SESSION['datos_viaje']['fecha_ida']); ?></p>
                 <p><strong>Fecha de Vuelta:</strong> <?php echo htmlspecialchars($_SESSION['datos_viaje']['fecha_vuelta']); ?></p>
-                <p><strong>Total a Pagar:</strong> S/ <?php echo number_format($total, 2); ?></p>
+                <p><strong>Total a Pagar:</strong> <?php echo $currency . " " . number_format($total, 2); ?></p>
                 <p><strong>Método de Pago:</strong> <?php echo htmlspecialchars($paymentMethod); ?></p>
         </div>
         <div class="mt-6">
@@ -145,3 +150,44 @@ include 'layouts/header.php';
     <?php include 'layouts/footer.php'; ?>
 </body>
 </html>
+<script>
+        function setCurrency(symbol) {
+            // Guardar la moneda seleccionada en localStorage
+            localStorage.setItem('currency', symbol);
+            document.getElementById('currency-symbol').textContent = symbol; // Cambiar el símbolo en el botón
+            document.getElementById('currency').value = symbol; // Actualizar el campo oculto
+
+            // Realizar la conversión y actualizar el total mostrado
+            const total = <?php echo json_encode($total); ?>; // Total en soles (S/)
+            const conversionRates = {
+                'S/': 1,
+                '$': 3.75,
+                '€': 4.10,
+                '¥': 0.027
+            };
+            
+            // Calcular el total convertido según la moneda seleccionada
+            const totalConverted = total * conversionRates[symbol];
+            
+            // Actualizar el total mostrado en la página
+            document.getElementById('total-amount').textContent = symbol + " " + totalConverted.toFixed(2);
+
+            closeCurrencyMenu(); // Cerrar el menú después de seleccionar
+        }
+
+        // Establecer la moneda por defecto al cargar la página
+        document.addEventListener('DOMContentLoaded', function() {
+            const currency = localStorage.getItem('currency') || 'S/';
+            document.getElementById('currency').value = currency;        
+        });
+
+        window.onload = function() {
+            const currency = localStorage.getItem('currency') || 'S/';
+            document.getElementById('currency-symbol').textContent = currency; // Actualizar el símbolo en el botón
+            setCurrency(currency); // Llamar a la función para actualizar el total
+        }
+
+
+        // Disparar el evento de cambio al cargar la página para mostrar los campos predeterminados
+        document.getElementById('payment-method').dispatchEvent(new Event('change'));
+    </script>

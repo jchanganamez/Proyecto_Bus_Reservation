@@ -44,6 +44,14 @@
             font-size: 1.5rem;
             color: #4A4A4A;
         }
+        .hidden {
+            display: none; /* Ocultar el elemento */
+        }
+
+        #currency-menu {
+            position: absolute; /* Asegúrate de que el menú se posicione correctamente */
+            z-index: 10; /* Asegúrate de que esté por encima de otros elementos */
+        }
     </style>
 </head>
 
@@ -51,7 +59,7 @@
     <div class="flex h-screen">
         <!-- Sidebar -->
         <div id="sidebar" class="bg-gray-800 text-white w-64 space-y-6 py-7 px-2 absolute inset-y-0 left-0 transform -translate-x-full md:relative md:translate-x-0 transition duration-200 ease-in-out">
-            <a href="/" class="text-white flex items-center space-x-2 px-4">
+            <a href="<?php echo BASE_URL; ?>views/home.php" class="text-white flex items-center space-x-2 px-4">
                 <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"></path>
                 </svg>
@@ -150,6 +158,25 @@
                                 </svg>
                                 <span class="text-gray-700"><?php echo $_SESSION['nombre'] ?? 'Invitado'; ?></span>
                                 <span class="text-sm text-gray-500">(<?php echo (isset($_SESSION['es_admin']) && $_SESSION['es_admin'] == 0) ? 'Usuario' : 'Administrador' ?>)</span>
+                                
+                                <!-- Dropdown para selección de moneda -->
+                                <div class="relative inline-block text-left">
+                                    <div>
+                                        <button type="button" id="currency-button" onclick="toggleCurrencyMenu()" class="inline-flex justify-center items-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                                            <span id="currency-symbol">S/</span> <!-- Símbolo de moneda -->
+                                        </button>
+                                    </div>
+
+                                    <div id="currency-menu" class="absolute right-0 z-10 mt-2 w-28 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 hidden" role="menu" aria-orientation="vertical" aria-labelledby="currency-button" tabindex="-1">
+                                        <div class="py-1" role="none">
+                                            <a href="#" class="block px-4 py-2 text-sm text-gray-700" role="menuitem" onclick="setCurrency('S/'); return false;">Soles (S/)</a>
+                                            <a href="#" class="block px-4 py-2 text-sm text-gray-700" role="menuitem" onclick="setCurrency('$'); return false;">Dólares ($)</a>
+                                            <a href="#" class="block px-4 py-2 text-sm text-gray-700" role="menuitem" onclick="setCurrency('€'); return false;">Euros (€)</a>
+                                            <a href="#" class="block px-4 py-2 text-sm text-gray-700" role="menuitem" onclick="setCurrency('¥'); return false;">Yenes (¥)</a>
+                                        </div>
+                                    </div>
+                                </div>
+
                                 <form action="<?php echo BASE_URL; ?>api/logout.php" method="POST" class="inline">
                                     <button type="submit" class="flex items-center space-x-2 px-4 py-2 rounded-lg text-gray-700 hover:bg-gray-100 transition-colors">
                                         Cerrar Sesión
@@ -173,5 +200,36 @@
     function toggleSidebar() {
         var sidebar = document.getElementById('sidebar');
         sidebar.classList.toggle('hidden');
+    }
+    function setCurrency(symbol) {
+        // Guardar la moneda seleccionada en localStorage
+        localStorage.setItem('currency', symbol);
+        document.getElementById('currency-symbol').textContent = symbol; // Cambiar el símbolo en el botón
+        closeCurrencyMenu(); // Cerrar el menú después de seleccionar
+    }
+
+    function toggleCurrencyMenu() {
+        const menu = document.getElementById('currency-menu');
+        menu.classList.toggle('hidden'); // Alternar la visibilidad del menú
+    }
+
+    function closeCurrencyMenu() {
+        const menu = document.getElementById('currency-menu');
+        menu.classList.add('hidden'); // Asegurarse de que el menú esté oculto
+    }
+
+    // Cerrar el menú al hacer clic fuera de él
+    window.onclick = function(event) {
+        const menu = document.getElementById('currency-menu');
+        const button = document.getElementById('currency-button');
+        if (!button.contains(event.target) && !menu.contains(event.target)) {
+            closeCurrencyMenu(); // Cerrar el menú si se hace clic fuera de él
+        }
+    }
+
+    // Cargar la moneda seleccionada al cargar la página
+    window.onload = function() {
+        const currency = localStorage.getItem('currency') || 'S/'; // Obtener la moneda seleccionada o usar 'S/' por defecto
+        document.getElementById('currency-symbol').textContent = currency; // Actualizar el símbolo en el botón
     }
 </script>

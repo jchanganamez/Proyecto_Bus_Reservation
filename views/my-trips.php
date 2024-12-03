@@ -10,18 +10,35 @@ require_once '../config/database.php'; // Asegúrate de que la ruta sea correcta
 // Crear conexión a la base de datos
 $database = new Database();
 $db = $database->getConnection();
-
-// Obtener el ID del usuario
 $userId = $_SESSION['user_id'];
 
+$message = "";
+
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['action'] === 'cancel') {
+    $tripId = $_POST['trip_id'];
+
+    // Aquí debes añadir la lógica para cancelar el viaje
+    $queryCancel = "UPDATE viajes SET estado = 'Cancelado' WHERE id = :trip_id AND user_id = :user_id";
+    $stmtCancel = $db->prepare($queryCancel);
+    $stmtCancel->bindParam(':trip_id', $tripId);
+    $stmtCancel->bindParam(':user_id', $userId);
+    
+    if ($stmtCancel->execute()) {
+        // Redirigir o mostrar un mensaje de éxito
+        $message = "El viaje ha sido cancelado exitosamente.";
+    } else {
+        $message = "Error al cancelar el viaje.";
+    }
+}
+
 // Consulta para obtener los viajes del usuario junto con los asientos usados y el estado del viaje
-$query = "SELECT v.origen, v.destino, v.fecha_salida, 
+$query = "SELECT v.id, v.origen, v.destino, v.fecha_salida, 
                  GROUP_CONCAT(dv.asiento ORDER BY dv.asiento SEPARATOR ', ') AS asientos, 
                  v.precio, v.estado 
           FROM viajes v
           JOIN detalle_viaje dv ON v.id = dv.viaje_id 
           WHERE v.user_id = :user_id 
-          GROUP BY v.id"; // Agrupar por ID del viaje
+          GROUP BY v.id";
 
 $stmt = $db->prepare($query);
 $stmt->bindParam(':user_id', $userId);
@@ -34,7 +51,6 @@ include 'layouts/header.php';
     <main class="flex-1 overflow-x-hidden overflow-y-auto bg-gray-100">
         <div class="max-w-4xl mx-auto px-6 py-8">
             <h1 class="text-3xl font-bold mb-6 text-amber-900">Mis Viajes</h1>
-            
             <div class="bg-white rounded-lg shadow-lg overflow-hidden">
                 <div class="overflow-x-auto">
                     <table class="min-w-full divide-y divide-gray-200">
@@ -67,7 +83,7 @@ include 'layouts/header.php';
                                             $colorTexto = 'text-green-800'; // Texto verde oscuro
                                             $colorFondo = 'bg-green-100'; // Fondo verde claro
                                             break;
-                                        case 'En espera':
+                                        case 'En Espera':
                                             $colorTexto = 'text-blue-800'; // Texto naranja oscuro
                                             $colorFondo = 'bg-blue-100'; // Fondo naranja claro
                                             break;
@@ -76,8 +92,8 @@ include 'layouts/header.php';
                                             $colorFondo = 'bg-red-100'; // Fondo rojo claro
                                             break;
                                         default:
-                                            $colorTexto = 'text-blue-800'; // Texto gris oscuro por defecto
-                                            $colorFondo = 'bg-blue-100'; // Fondo gris claro por defecto
+                                            $colorTexto = 'text-gray-800'; // Texto gris oscuro por defecto
+                                            $colorFondo = 'bg-gray-100'; // Fondo gris claro por defecto
                                     }
                                     ?>
                                     <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full <?= $colorFondo ?> <?= $colorTexto ?>">
@@ -85,6 +101,17 @@ include 'layouts/header.php';
                                     </span>
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap">S/ <?= number_format($row['precio'], 2) ?></td>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <?php if ($estado !== 'Cancelado' && $estado !== 'Confirmado'): ?>
+                                    <form action="my-trips.php" method="POST" style="display:inline;">
+                                        <input type="hidden" name="trip_id" value="<?= $row['id'] ?>">
+                                        <input type="hidden" name="action" value="cancel">
+                                            <button type="submit" class="text-red-600 hover:text-red-900" onclick="return confirm('¿Estás seguro de que deseas cancelar este viaje?');">
+                                                <i class="bi bi-trash"></i>
+                                            </button>
+                                        </form>
+                                    <?php endif; ?>
+                                </td>    
                             </tr>
                             <?php endwhile; ?>
                         </tbody>
